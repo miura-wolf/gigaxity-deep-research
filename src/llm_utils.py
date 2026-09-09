@@ -87,9 +87,16 @@ MODEL_CONTEXT_WINDOWS: dict[str, int] = {
     # 131072-token window.
     "qwen/qwen3-30b-a3b-thinking-2507": 131072,
     "Qwen/Qwen3-30B-A3B-Thinking-2507": 131072,
-    # z.ai GLM-5.2 (OpenAI-compatible coding endpoint): 1M-token context
+    # z.ai GLM-5.x (OpenAI-compatible coding endpoint): 1M-token context
     # window per z.ai's published spec. Without an entry a GLM deployment is
     # budgeted as an unknown 32K model, which starves its source formatting.
+    # z.ai serves the whole GLM-5 line from glm-5.3 (glm-5, 5.1 and 5.2 all
+    # resolve to it upstream); 5.2 stays registered so a deployment still
+    # pinned to it keeps the 1M window rather than the 32K default.
+    # glm-5.3-flash is a SEPARATE model, not an alias of 5.3 (probed 2026-08-27:
+    # it echoes back as itself). Same 1M window; 3x cheaper on Coding-Plan credits.
+    "glm-5.3-flash": 1_000_000,
+    "glm-5.3": 1_000_000,
     "glm-5.2": 1_000_000,
 }
 
