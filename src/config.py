@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     serpapi_api_key: str = Field(default="", description="SerpApi API key")
     serpapi_engine: str = Field(default="google", description="SerpApi engine: google, bing, duckduckgo, ...")
 
+    # ddgs Configuration (keyless metasearch lane, opt-in)
+    ddgs_enabled: bool = Field(default=False, description="Enable the keyless ddgs metasearch lane (deedy5/ddgs). Off by default: a scraped lane is less durable under sustained automated load than a keyed API, so existing deployments see no behaviour change on upgrade.")
+    ddgs_backend: str = Field(default="auto", description="ddgs text() backend: auto (metasearch across all engines) or a comma-delimited subset (bing, duckduckgo, google, mojeek, startpage, yandex, yahoo, wikipedia)")
+    ddgs_region: str = Field(default="wt-wt", description="ddgs region for results, e.g. us-en, es-es; wt-wt = no region bias")
+    ddgs_safesearch: str = Field(default="moderate", description="ddgs safesearch: on, moderate, off")
+
+    # LLM rate limiting (client-side)
+    llm_rpm: int = Field(default=0, ge=0, description="Max LLM requests per 60s sliding window, enforced client-side before every call made through this project's client wrapper. 0 (the default) disables it. Set below the endpoint's cap for free tiers that reject bursts — e.g. 40 for NVIDIA NIM free-tier's ~45 RPM: the limiter waits for a slot instead of letting the endpoint (and the SDK's retry loop on top of it) answer 429/503 ResourceExhausted. Applies to MCP, REST and library calls made through the wrapper; a client injected into SynthesisEngine owns its own pacing.")
+
     # OpenRouter LLM Configuration
     llm_api_base: str = Field(default="https://openrouter.ai/api/v1", description="LLM API base URL")
     llm_api_key: str = Field(default="", description="OpenRouter API key")

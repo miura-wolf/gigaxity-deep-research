@@ -9,6 +9,7 @@ import httpx
 from typing import Optional, List, Dict, Any
 from openai import AsyncOpenAI
 from . import progress
+from .rate_limit import get_rate_limiter
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,12 @@ class OpenRouterClient:
             # own value, so behaviour is unchanged unless a deployment sets it.
             max_retries=settings.llm_max_retries,
         )
+
+        # Client-side RPM limiter for capped free-tier endpoints (NIM ~45 RPM).
+        # See src/rate_limit.py: one process-wide instance shared by every call
+        # through this method, so the whole server (synthesis stages, RCS
+        # summaries, gate scorer) draws from ONE request budget.
+        self._rate_limiter = get_rate_limiter()
 
         # Track which model was last used
         self.last_model_used: Optional[str] = None
@@ -121,6 +128,17 @@ class OpenRouterClient:
         try:
             try:
                 async with asyncio.timeout(cap if cap > 0 else None):
+                    # Rate-limit wait lives HERE deliberately: inside the
+                    # heartbeat's coverage (a queued request keeps resetting
+                    # the MCP client's idle timer instead of reading as a
+                    # dead connection) and inside the wall-clock cap (the wait
+                    # is part of the call's real cost, so a queued request
+                    # must not silently exceed a deliberate ceiling).
+                    # Cancel-safe: a limiter waiting on its lock/sleep aborts
+                    # immediately and consumes no slot.
+                    if self._rate_limiter.enabled:
+                        await progress.tick("rate limiter: waiting for a free slot")
+                    await self._rate_limiter.acquire()
                     response = await self._client.chat.completions.create(
                         model=current_model,
                         messages=messages,

@@ -7,6 +7,7 @@ from .linkup import LinkUpConnector
 from .brave import BraveConnector
 from .exa import ExaConnector
 from .serpapi import SerpApiConnector
+from .ddgs import DDGSConnector
 
 __all__ = [
     "SearchResult",
@@ -18,4 +19,5 @@ __all__ = [
     "BraveConnector",
     "ExaConnector",
     "SerpApiConnector",
+    "DDGSConnector",
 ]

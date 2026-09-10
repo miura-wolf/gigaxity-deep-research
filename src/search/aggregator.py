@@ -11,6 +11,7 @@ from ..connectors import (
     BraveConnector,
     ExaConnector,
     SerpApiConnector,
+    DDGSConnector,
 )
 from .fusion import rrf_fusion
 from ..config import settings
@@ -46,6 +47,7 @@ class SearchAggregator:
                 BraveConnector(),
                 ExaConnector(),
                 SerpApiConnector(),
+                DDGSConnector(),
             ]
             self.connectors = [c for c in all_connectors if c.is_configured()]
 

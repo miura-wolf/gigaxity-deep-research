@@ -239,8 +239,9 @@ class TestDoctor:
         monkeypatch.setattr(settings, "linkup_api_key", "")
         monkeypatch.setattr(settings, "exa_api_key", "")
         monkeypatch.setattr(settings, "serpapi_api_key", "")
+        monkeypatch.setattr(settings, "ddgs_enabled", False)
         checks = asyncio.run(check_connectors())
-        assert {c.name for c in checks} == {"searxng", "tavily", "linkup", "exa", "serpapi"}
+        assert {c.name for c in checks} == {"searxng", "tavily", "linkup", "exa", "serpapi", "ddgs"}
         assert all(c.status == "unconfigured" for c in checks)
 
 

@@ -14,14 +14,14 @@ import logging
 import time
 
 from .base import Connector, ConnectorHealth
-from . import SearXNGConnector, TavilyConnector, LinkUpConnector, ExaConnector, SerpApiConnector
+from . import SearXNGConnector, TavilyConnector, LinkUpConnector, ExaConnector, SerpApiConnector, DDGSConnector
 
 logger = logging.getLogger(__name__)
 
 
 def known_connectors() -> list[Connector]:
     """Every connector this build knows, configured or not."""
-    return [SearXNGConnector(), TavilyConnector(), LinkUpConnector(), ExaConnector(), SerpApiConnector()]
+    return [SearXNGConnector(), TavilyConnector(), LinkUpConnector(), ExaConnector(), SerpApiConnector(), DDGSConnector()]
 
 
 async def check_connectors(
