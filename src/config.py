@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     brave_country: str = Field(default="", description="Optional ISO country code for geo-targeting, e.g. 'us'")
     brave_safesearch: str = Field(default="off", description="Safe search: off, moderate, or strict")
 
+    # Exa Configuration (neural web-search lane)
+    exa_api_key: str = Field(default="", description="Exa API key")
+    exa_type: str = Field(default="auto", description="Search type: auto, neural, keyword, or fast")
+    exa_text_max_chars: int = Field(default=1000, description="Max characters of page text fetched per result (billed content); 10 results per search are included in the base price")
+
+    # SerpApi Configuration (classic SERP lane)
+    serpapi_api_key: str = Field(default="", description="SerpApi API key")
+    serpapi_engine: str = Field(default="google", description="SerpApi engine: google, bing, duckduckgo, ...")
+
     # OpenRouter LLM Configuration
     llm_api_base: str = Field(default="https://openrouter.ai/api/v1", description="LLM API base URL")
     llm_api_key: str = Field(default="", description="OpenRouter API key")

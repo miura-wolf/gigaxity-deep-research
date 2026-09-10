@@ -237,8 +237,10 @@ class TestDoctor:
         monkeypatch.setattr(settings, "searxng_host", "")
         monkeypatch.setattr(settings, "tavily_api_key", "")
         monkeypatch.setattr(settings, "linkup_api_key", "")
+        monkeypatch.setattr(settings, "exa_api_key", "")
+        monkeypatch.setattr(settings, "serpapi_api_key", "")
         checks = asyncio.run(check_connectors())
-        assert {c.name for c in checks} == {"searxng", "tavily", "linkup"}
+        assert {c.name for c in checks} == {"searxng", "tavily", "linkup", "exa", "serpapi"}
         assert all(c.status == "unconfigured" for c in checks)
 
 
