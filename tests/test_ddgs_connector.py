@@ -58,8 +58,13 @@ class TestDDGSConnectorBasics:
 
     @pytest.mark.unit
     def test_is_not_configured_by_default(self):
-        """Off by default: upgrading must not silently enable a scraped lane."""
-        assert DDGSConnector().is_configured() is False
+        """Off by default: upgrading must not silently enable a scraped lane.
+        Assert the FIELD default, not the live settings value — a developer's
+        .env with RESEARCH_DDGS_ENABLED=true is deployment config, and
+        `settings.ddgs_enabled` would read that instead of shipped code."""
+        from src.config import Settings
+
+        assert Settings.model_fields["ddgs_enabled"].default is False
 
     @pytest.mark.unit
     def test_settings_enable_the_lane(self, monkeypatch):

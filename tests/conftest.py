@@ -21,6 +21,29 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "p1: P1 enhancement tests")
 
 
+@pytest.fixture(autouse=True)
+def _llm_rate_limiter_isolated(monkeypatch):
+    """Pin the client-side RPM limiter OFF for every test.
+
+    RESEARCH_LLM_RPM is deployment config — a developer's .env with e.g. 40
+    (NIM free-tier profile) is loaded by pydantic because tests run from the
+    repo root, and inheriting it would (a) add a third 'rate limiter' progress
+    tick inside chat_completion, breaking the exact-count assertions in
+    test_progress_reporting, (b) stall mock pipelines that fire many LLM calls
+    behind the sliding window, and (c) make default-value assertions read
+    local config instead of the shipped code. Tests must not depend on the
+    deployment's pacing; test_rate_limit re-enables and drives the limiter
+    explicitly per test.
+    """
+    from src.config import settings
+    from src.rate_limit import reset_rate_limiter
+
+    monkeypatch.setattr(settings, "llm_rpm", 0)
+    reset_rate_limiter()
+    yield
+    reset_rate_limiter()
+
+
 @pytest.fixture
 def sample_query():
     """Sample search query for tests."""

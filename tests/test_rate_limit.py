@@ -47,7 +47,12 @@ def _reset_limiter():
 class TestDisabledByDefault:
 
     def test_shipped_default_is_zero(self):
-        assert settings.llm_rpm == 0
+        """Assert the FIELD default, not the live settings value: pydantic
+        loads a developer's .env (RESEARCH_LLM_RPM=40 for the NIM profile),
+        so `settings.llm_rpm` reads deployment config, not shipped code."""
+        from src.config import Settings
+
+        assert Settings.model_fields["llm_rpm"].default == 0
 
     @pytest.mark.asyncio
     async def test_disabled_is_noop(self):
@@ -264,8 +269,11 @@ class TestNIMFreeTierProfile:
 
     def test_documented_profile_stays_under_the_cap(self):
         """NIM free-tier rejects bursts around ~45 RPM; the recommended
-        profile (40) must stay under it with headroom, and the knob must be
-        wired so a deployment can set it without editing source."""
+        profile (40) must stay under it with headroom. The shipped default
+        is asserted via the FIELD (model_fields), immune to a developer's
+        .env carrying the 40 profile — that file is deployment config."""
+        from src.config import Settings
+
         lim = SlidingWindowRateLimiter(rpm=40)
         assert lim.rpm < 45
-        assert settings.llm_rpm == 0  # documented, off by default
+        assert Settings.model_fields["llm_rpm"].default == 0
